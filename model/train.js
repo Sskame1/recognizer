@@ -1,15 +1,14 @@
 const tf = require('@tensorflow/tfjs-node');
 const fs = require('fs');
 const path = require('path');
-const { createModel } = require('./model')
+const { createModel } = require('./model');
 
-// Функция для загрузки и подготовки данных (упрощенная)
+// Загружаем данные
 async function loadData(dataDir) {
     const images = [];
     const labels = [];
     const labelNames = fs.readdirSync(dataDir); // Получение имен папок-классов
 
-    // Загружаем изображения
     for (let labelIndex = 0; labelIndex < labelNames.length; labelIndex++) {
         const label = labelNames[labelIndex];
         const imageFiles = fs.readdirSync(path.join(dataDir, label));
@@ -22,17 +21,17 @@ async function loadData(dataDir) {
             labels.push(labelIndex);
         }
     }
-    
-    return [tf.concat(images), tf.tensor1d(labels, 'int32')]; // Объединяем тензоры
+
+    return [tf.concat(images), tf.tensor1d(labels, 'int32')];
 }
 
 async function train() {
     const model = createModel();
-    const [images, labels] = await loadData('path_to_your_data');
+    const [images, labels] = await loadData(path.join(__dirname, '../data/raw'));
 
     await model.fit(images, labels, {
         epochs: 10,
-        callbacks: tf.callbacks.earlyStopping({monitor: 'loss'}),
+        callbacks: tf.callbacks.earlyStopping({ monitor: 'loss' }),
     });
 
     // Сохранение модели
